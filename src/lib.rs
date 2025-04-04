@@ -48,7 +48,7 @@ use macroquad::prelude::{
 
 use crate::{
   atlas::Atlas,
-  misc::{read_file, IoError, IoErrorKind, IoResult},
+  misc::read_file,
 };
 
 pub(crate) mod atlas;
@@ -285,31 +285,31 @@ impl<'a> Fonts<'a> {
   /// Loads font from bytes with a given name and a default scale of 100.0
   ///
   /// **See** [Self::load_font_from_bytes_with_scale]
-  pub fn load_font_from_bytes(&mut self, name: &'a str, bytes: &[u8]) -> FontResult<()> {
+  pub async fn load_font_from_bytes(&mut self, name: &'a str, bytes: &[u8]) -> FontResult<()> {
     self.load_font_from_bytes_with_scale(name, bytes, 100.0)
   }
 
   /// Loads font from a file with a given name and path and a default scale of 100.0
   ///
   /// **See** [Self::load_font_from_bytes_with_scale]
-  pub fn load_font_from_file(&mut self, name: &'a str, path: impl AsRef<Path>) -> IoResult<()> {
-    self.load_font_from_file_with_scale(name, path, 100.0)
+  pub async fn load_font_from_file(&mut self, name: &'a str, path: impl AsRef<Path>) -> Result<(), macroquad::Error> {
+    self.load_font_from_file_with_scale(name, path, 100.0).await
   }
 
   /// Loads font from a file with a given name, path and scale
   ///
   /// **See** [Self::load_font_from_bytes_with_scale]
-  pub fn load_font_from_file_with_scale(
+  pub async fn load_font_from_file_with_scale(
     &mut self,
     name: &'a str,
     path: impl AsRef<Path>,
     scale: f32,
-  ) -> IoResult<()> {
-    let bytes = read_file(path)?;
+  ) -> Result<(), macroquad::Error> {
+    let bytes = read_file(path).await?;
 
     self
       .load_font_from_bytes_with_scale(name, &bytes, scale)
-      .map_err(|err| IoError::new(IoErrorKind::InvalidData, err))
+      .map_err(|_| macroquad::Error::FontError("Invalid data"))
   }
 
   /// Unloads a currently loaded font by its index
